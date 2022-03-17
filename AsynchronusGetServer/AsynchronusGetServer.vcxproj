@@ -140,12 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="asyncserver2.cpp" />
-    <ClCompile Include="asyncServerBak.cpp" />
-    <ClCompile Include="string.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="string.hpp" />
+    <ClCompile Include="async_server.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
