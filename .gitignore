@@ -397,5 +397,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-# Ignore boost library
-AsynchronousGetServer/boost_1_78_0/
+# Ignore log file
+log.txt
