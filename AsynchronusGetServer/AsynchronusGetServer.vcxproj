@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\jjgra\OneDrive - Kent State University\Desktop\Homework Repos\Project1\VS\AsynchronusGetServer\AsynchronusGetServer\boost_1_78_0;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\jjgra\OneDrive - Kent State University\Desktop\Homework Repos\Project1\VS\boost_1_78_0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -140,7 +140,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="asyncserver.cpp" />
+    <ClCompile Include="asyncserver2.cpp" />
+    <ClCompile Include="asyncServerBak.cpp" />
     <ClCompile Include="string.cpp" />
   </ItemGroup>
   <ItemGroup>

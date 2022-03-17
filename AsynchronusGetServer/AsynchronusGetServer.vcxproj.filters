@@ -15,10 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="asyncserver.cpp">
+    <ClCompile Include="asyncserver2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asyncServerBak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

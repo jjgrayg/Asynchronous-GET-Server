@@ -1,5 +1,6 @@
 #include <boost/asio.hpp> 
 #include <boost/bind.hpp>
+#include <boost/logic/tribool.hpp>
 #include <cstdint> 
 #include <iostream>
 #include <list>
@@ -10,12 +11,15 @@
 
 using std::vector;
 
+int CONNECTOR_TALLY = 0;
+
 struct Connection {
 	boost::asio::ip::tcp::socket socket;
 	boost::asio::streambuf read_buffer;
 	Connection(boost::asio::io_service& io_service) : socket(io_service), read_buffer() { }
 	Connection(boost::asio::io_service& io_service, size_t max_buffer_size) : socket(io_service), read_buffer(max_buffer_size) { }
-    std::string request;
+	std::string request;
+    int conn_id = CONNECTOR_TALLY++;
 };
 
 class Server {
@@ -28,20 +32,19 @@ public:
 
 	Server() : m_ioservice(), m_acceptor(m_ioservice), m_connections() { }
 
-	void handle_read(con_handle_t& con_handle, boost::system::error_code const& err, size_t bytes_transfered) {
+	void handle_read(con_handle_t con_handle, boost::system::error_code const& err, size_t bytes_transfered) { 
 		if (bytes_transfered > 0) {
 			std::istream is(&con_handle->read_buffer);
-            std::istreambuf_iterator<char> eos;
-            std::string tempreq(std::istreambuf_iterator<char>(is), eos);
-            con_handle->request = tempreq;
+			std::istreambuf_iterator<char> eos;
+			std::string tempreq(std::istreambuf_iterator<char>(is), eos);
+			con_handle->request = tempreq;
 			std::string line;
 			std::getline(is, line);
-			std::cout << "Message Received: " << tempreq << std::endl;
 		}
 
 		if (!err) {
-            handle_accept(con_handle, err);
 			do_async_read(con_handle);
+            write_response(con_handle);
 		}
         else if (err == boost::asio::error::eof) {}
 		else {
@@ -50,23 +53,17 @@ public:
 		}
 	}
 
-	void do_async_read(con_handle_t& con_handle) {
+	void do_async_read(con_handle_t con_handle) {
 		auto handler = boost::bind(&Server::handle_read, this, con_handle, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred);
 		boost::asio::async_read_until(con_handle->socket, con_handle->read_buffer, "\r\n\r\n", handler);
 	}
 
-	void handle_write(con_handle_t& con_handle, std::shared_ptr<std::string> msg_buffer, boost::system::error_code const& err) {
+	void handle_write(con_handle_t con_handle, std::shared_ptr<std::string> msg_buffer, boost::system::error_code const& err) {
 		if (!err) {
-			std::cout << "Finished sending message\n";
+			std::cout << "Finished sending acknowledgment\n";
 			if (con_handle->socket.is_open()) {
-                //do_async_read(con_handle);
-                //if (con_handle->request.size() == 0) {
-                //    con_handle->socket.close();
-                //}
+                std::cout << "Connection still open...\n";
 			}
-            //else {
-            //    con_handle->socket.close();
-            //}
 		}
 		else {
 			std::cerr << "We had an error: " << err.message() << std::endl;
@@ -74,37 +71,64 @@ public:
 		}
 	}
 
+    void handle_response(con_handle_t con_handle, std::shared_ptr<std::string> msg_buffer, bool isFinished, boost::system::error_code const& err) {
+        if (!err && isFinished) {
+            std::cout << "Finished sending response to connection #" << con_handle->conn_id << "\n";
+            if (con_handle->socket.is_open()) {
+                std::cout << "Connection #" << con_handle->conn_id << " will be shut down...\n";
+                con_handle->read_buffer.consume(con_handle->read_buffer.size());
+                con_handle->socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+            }
+        }
+        else if (!isFinished) {
+            std::cout << "Sending more to connection #" << con_handle->conn_id << "\n";
+        }
+        else {
+            std::cerr << "We had an error: " << err.message() << std::endl;
+            con_handle->read_buffer.consume(con_handle->read_buffer.size());
+            m_connections.erase(con_handle);
+        }
+    }
+
+    void write_response(con_handle_t con_handle) {
+        String req(con_handle->request.c_str());
+        std::cout << "WRITE_RESPONSE || Message Received by connection #" << con_handle->conn_id << ": " << req.split('\n')[0] << std::endl << std::endl;
+
+        String reqfile = parseGet(con_handle->request.c_str());
+        std::tuple<String, bool, vector<unsigned char>> resinfo = formulateResponse(reqfile);
+        String res = std::get<0>(resinfo);
+        bool isBinary = std::get<1>(resinfo);
+        vector<unsigned char> fileBuff = std::get<2>(resinfo);
+        size_t binarySize = fileBuff.size();
+
+        auto buff = std::make_shared<std::string>(res.getArr());
+        //std::cout << "RESPONSE:\n" << *buff << std::endl << std::endl;;
+
+        auto handler = boost::bind(&Server::handle_response, this, con_handle, buff, !isBinary, boost::asio::placeholders::error);
+        boost::asio::async_write(con_handle->socket, boost::asio::buffer(*buff), handler);
+
+        if (isBinary) {
+            char* fileBuffArr = new char[binarySize];
+            int i = 0;
+            for_each(fileBuff.begin(), fileBuff.end(), [&](unsigned char c) {
+                fileBuffArr[i] = c;
+                ++i;
+                });
+            auto buff2 = std::make_shared<std::string>(fileBuffArr);
+            auto handler = boost::bind(&Server::handle_response, this, con_handle, buff2, isBinary, boost::asio::placeholders::error);
+            boost::asio::async_write(con_handle->socket, boost::asio::buffer(fileBuffArr, binarySize), handler);
+        }
+    }
+
 	void handle_accept(con_handle_t& con_handle, boost::system::error_code const& err) {
 		if (!err) {
+            std::cout << "Connection from: " << con_handle->socket.remote_endpoint().address() << std::endl;
+            std::cout << "Sending acknowledgement" << std::endl;
+			auto buff = std::make_shared<std::string>("\r\n\r\n");
+            auto handler = boost::bind(&Server::handle_write, this, con_handle, buff, boost::asio::placeholders::error);
+            boost::asio::async_write(con_handle->socket, boost::asio::buffer(*buff), handler);
             do_async_read(con_handle);
-			std::cout << "Sending message\n";
 
-            String reqfile = parseGet(con_handle->request.c_str());
-            std::tuple<String, bool, vector<unsigned char>> resinfo = formulateResponse(reqfile);
-            String res = std::get<0>(resinfo);
-            bool isBinary = std::get<1>(resinfo);
-            vector<unsigned char> fileBuff = std::get<2>(resinfo);
-            size_t binarySize = fileBuff.size();
-
-            if (res != "") {
-                auto buff = std::make_shared<std::string>(res.getArr());
-                auto handler = boost::bind(&Server::handle_write, this, con_handle, buff, boost::asio::placeholders::error);
-                boost::asio::async_write(con_handle->socket, boost::asio::buffer(*buff), handler);
-
-                std::cout << "Res: " << *buff << std::endl;
-
-                if (isBinary) {
-                    char* fileBuffArr = new char[binarySize];
-                    int i = 0;
-                    for_each(fileBuff.begin(), fileBuff.end(), [&](unsigned char c) {
-                        fileBuffArr[i] = c;
-                        ++i;
-                        });
-                    auto buff2 = std::make_shared<std::string>(fileBuffArr);
-                    auto handler = boost::bind(&Server::handle_write, this, con_handle, buff2, boost::asio::placeholders::error);
-                    boost::asio::async_write(con_handle->socket, boost::asio::buffer(fileBuffArr, binarySize), handler);
-                }
-            }
 		}
 		else {
 			std::cerr << "We had an error: " << err.message() << std::endl;
@@ -177,7 +201,6 @@ public:
             fileExtension = vec[1];
         }
         String fileName = vec[0];
-        std::cout << filePath << std::endl;
         if (filePath == "invalid") return std::make_tuple(response, binaryStatus, fileBuff);
         // If file can't be found return a 404 response
         if (!in) {
@@ -211,6 +234,7 @@ public:
             else if (fileExtension == "css") content_type = "text / css";
             else if (fileExtension == "png") { content_type = "image / png"; binaryStatus = true; }
             else if (fileExtension == "ico") { content_type = "image / png"; binaryStatus = true; }
+            else if (fileExtension == "jpg") { content_type = "image / jpeg"; binaryStatus = true; }
 
             // If the file isn't a binary file then simply read into a string and convert to custom String class
             if (!binaryStatus) {
@@ -248,8 +272,8 @@ public:
 };
 
 int main(int, char**) {
-	Server srv;
-	srv.listen(80);
+    Server srv;
+	srv.listen(8080);
 
 	srv.run();
 	return 0;
