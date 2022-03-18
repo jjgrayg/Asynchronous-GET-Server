@@ -13,7 +13,7 @@
 
 int main(int, char**) {
     Server srv;
-	srv.listen(8080);
+	srv.listen(80);
 
 	srv.run();
 	return 0;

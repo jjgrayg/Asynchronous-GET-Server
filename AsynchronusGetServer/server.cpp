@@ -219,23 +219,23 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 	// Create input file stream
 	std::ifstream in(filePath.c_str());
 
-	// Get current time and store in char array
+	// Get current date and time and store in char array
 	auto start = std::chrono::system_clock::now();
 	std::time_t time = std::chrono::system_clock::to_time_t(start);
 	char charTime[256];
 	ctime_s(charTime, sizeof(charTime), &time);
 
 	// Initialize necessary vars
-	string response;
 	vector<unsigned char> fileBuff;
-	unsigned long imageSize = 0;
 	bool binaryStatus = false;
 	vector<string> vec = split_string(filePath, '.');
+	string fileName = vec[0];
 	string fileExtension;
+	string response;
+
 	if (vec.size() > 1) {
 		fileExtension = vec[1];
 	}
-	string fileName = vec[0];
 
 	// If the file requested is invalid as decided by "parse_get()" return default values
 	if (filePath == "invalid") return std::make_tuple(response, binaryStatus, fileBuff);
@@ -243,22 +243,26 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 	// If file can't be found return a 404 response
 	if (!in) {
 		std::cerr << "Could not open " << filePath << std::endl;
-		response = response + "HTTP/1.1 404 Not Found\r\n" +
-			"Date: " + charTime + " EST\r\n" +
-			"Server : GetServer9000\r\n" +
-			"Content - Length : 230\r\n" +
-			"Connection : Closed\r\n" +
-			"Content - Type : text / html; charset = iso - 8859 - 1\r\n\r\n" +
-			"<!DOCTYPE HTML>\r\n" +
-			"<html>\r\n" +
-			"<head>\r\n" +
-			"<title>404 Not Found</title>\r\n" +
-			"</head>\r\n" +
-			"<body>\r\n" +
-			"<h1>Not Found</h1>\r\n" +
-			"<p>The requested URL /" + fileName + " was not found on this server.</p>\r\n" +
-			"</body>\r\n" +
-			"</html>";
+		response = "HTTP/1.1 404 Not Found\r\n"
+			"Date: ";
+		response.append(charTime)
+			.append(" EST\r\n"
+					"Server : Boost-Async-GET-Server\r\n"
+					"Content - Length : 230\r\n"
+					"Connection : Closed\r\n"
+					"Content - Type : text / html; charset = iso - 8859 - 1\r\n\r\n"
+					"<!DOCTYPE HTML>\r\n"
+					"<html>\r\n"
+					"<head>\r\n"
+					"<title>404 Not Found</title>\r\n"
+					"</head>\r\n"
+					"<body>\r\n"
+					"<h1>Not Found</h1>\r\n"
+					"<p>The requested URL /")
+			.append(fileName)
+			.append(" was not found on this server.</p>\r\n"
+					"</body>\r\n"
+					"</html>");
 	}
 
 	// If the file is found then parse
@@ -290,23 +294,31 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 		}
 
 		// Begin creating response
-		response = response + "HTTP/1.1 200 OK\r\n" +
-			"Date: " + charTime + " EST\r\n"
-			"Server : GetServer9000\r\n" +
-			"Content - Type : " + content_type + "\r\n" +
-			"Connection: Closed\r\n";
-		char num_char[10 + sizeof(char)];
+		response = "HTTP/1.1 200 OK\r\n"
+					"Date: ";
+		response.append(charTime)
+			.append(" EST\r\n"
+					"Server : Boost-Async-GET-Server\r\n"
+					"Content - Type : ")
+			.append(content_type)
+			.append("\r\n"
+					"Connection: Closed\r\n");
 
 		// Convert size to char array
+		char num_char[10 + sizeof(char)];
 		sprintf_s(num_char, "%d", (int)rS.length() + (int)response.length() + (int)fileBuff.size());
+
 #ifdef LOG_MODE
 		write_to_log("200 ");
 		write_to_log(num_char);
 		log_writer << std::endl;
 #endif // LOG_MODE
-		if (binaryStatus) response = response + "accept-ranges: bytes\r\nContent-Transfer-Encoding: binary\r\n";
-		response = response + "Content - Length : " + num_char + "\r\n\r\n";
-		response += rS;
+
+		if (binaryStatus) response.append("accept-ranges: bytes\r\nContent-Transfer-Encoding: binary\r\n");
+		response.append("Content - Length : ")
+			.append(num_char)
+			.append("\r\n\r\n")
+			.append(rS);
 
 	}
 	in.close();
