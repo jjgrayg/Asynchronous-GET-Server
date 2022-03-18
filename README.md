@@ -9,11 +9,11 @@ The code may also be openned as a Visual Studio project and built from there.
 
 All files that can be accessed by the server *must* be kept in a folder called "html" in the same directory as the server executable. The folder structure should look like:
 
-server/
-├── server.exe
-└── html/
-    ├── index.html
-    └── *other files*
+server/<br>
+├── server.exe<br>
+└── html/<br>
+    ├── index.html<br>
+    └── *other files*<br>
     
 ---
 
