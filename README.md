@@ -7,6 +7,14 @@ The code may also be openned as a Visual Studio project and built from there.
 
 ---
 
+This program requires the Boost library at version 1.78.0. If you're not using Visual Studio this should be as simple as having the *boost_1_78_0* folder in the same directory as the .cpp and .hpp files and changing the Boost include lines in connection.hpp to include the *boost_1_78_0/* prefix. For example `#include <boost/asio.hpp>` becomes `#include <boost_1_78_0/boost/asio.hpp>`, or to make it easier you could rename *boost_1_78_0* to *boost* and `#include <boost/asio.hpp>` instead becomes `#include <boost/boost/asio.hpp>`.<br><br> 
+
+If you decide to use Visual Studio you must change the project settings to point to the right include directory. Go to *Project>Properties* to open up the properties
+editor. From here go to *VC++ Directories* and add an entry to include directories that points to your *boost_1_78_0* folder. From there you should be able to build
+and run the project.
+
+---
+
 All files that can be accessed by the server *must* be kept in a folder called "html" in the same directory as the server executable. The folder structure should look like:
 
     server/
@@ -14,6 +22,8 @@ All files that can be accessed by the server *must* be kept in a folder called "
     └── html/
         ├── index.html
         └── *other files*
+	
+This repository comes with a folder containing an executable and sample website (my current portfolio site) for those who just want to see it in action.
     
 ---
 
