@@ -38,8 +38,6 @@ void Server::handle_read(con_handle_t con_handle, boost::system::error_code cons
 		std::istreambuf_iterator<char> eos;
 		string tempreq(std::istreambuf_iterator<char>(is), eos);
 		con_handle->request = tempreq;
-		string line;
-		std::getline(is, line);
 	}
 
 	if (!err) {
