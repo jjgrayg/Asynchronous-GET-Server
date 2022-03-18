@@ -27,5 +27,5 @@ This repository comes with a folder containing an executable and sample website 
     
 ---
 
-The server will respond with either a 200 status, in which case the response contains the attached file, or a 404 meaning the requested file cannot be found.
+The server will respond with either a 200 response, in which case the response contains the attached file, or a 404 response containing a default 404 error page meaning the requested file cannot be found.
 Every request is logged in a local *log.txt* file that is in the same location as your executable. 
