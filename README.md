@@ -2,7 +2,7 @@
 <br>
 
 ## Overview
-This is a basic asynchronous server utilizing Boost's ASIO to respond to get requests from a browser.
+This is a basic asynchronous server utilizing Boost's ASIO to respond to GET requests from a browser.
 The code may be compiled using the following command:
 	`clang++ main.cpp server.cpp -o server`
 The code may also be openned as a Visual Studio project and built from there. <br><br>
