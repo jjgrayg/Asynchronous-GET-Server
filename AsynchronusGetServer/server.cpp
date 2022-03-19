@@ -25,7 +25,7 @@ void Server::write_to_log(string str) {
 	log_writer << str;
 }
 
-// Handles closing log_writer at exit
+// Handles closing log_writer
 void Server::close_log_writer() {
 	log_writer.close();
 }
@@ -46,7 +46,7 @@ void Server::handle_read(con_handle_t con_handle, boost::system::error_code cons
 	}
 	else if (err == boost::asio::error::eof) {}
 	else {
-		std::cerr << "We had an error: " << err.message() << std::endl;
+		std::cerr << "ERROR:: " << err.message() << std::endl;
 		m_connections.erase(con_handle);
 	}
 }
@@ -62,16 +62,16 @@ void Server::do_async_read(con_handle_t con_handle) {
 // If there isn't close the connection and clear the streambuf
 void Server::handle_response(con_handle_t con_handle, std::shared_ptr<string> msg_buffer, bool isFinished, boost::system::error_code const& err) {
 	if (!err && isFinished) {
-		std::cout << "Finished sending response to connection...\n";
 		if (con_handle->socket.is_open()) {
-			std::cout << "Connection will be shut down...\n";
+			std::cout << "Killing connection to: " << con_handle->socket.remote_endpoint().address() << std::endl;
 			con_handle->read_buffer.consume(con_handle->read_buffer.size());
 			con_handle->socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-			std::cout << "Connection successfully shut down.\n";
+			std::cout << "Connection successfully shut down.\n" << std::endl;
 		}
 	}
 	else if (err) {
-		std::cerr << "We had an error: " << err.message() << std::endl;
+		std::cerr << "ERROR:: " << err.message() << std::endl;
+		std::cout << "Killing connection to: " << con_handle->socket.remote_endpoint().address() << std::endl << std::endl;
 		m_connections.erase(con_handle);
 	}
 }
@@ -139,8 +139,14 @@ void Server::write_response(con_handle_t con_handle) {
 // Handle what happens after the acknowledgement is sent
 // This function does nothing unless an error has occurred
 void Server::handle_acknowledge(con_handle_t con_handle, std::shared_ptr<string> msg_buffer, boost::system::error_code const& err) {
+
+#ifdef DEBUG_MODE
+	if (!err)
+		std::cout << "Acknowledgment sent." << std::endl;
+#endif // DEBUG_MODE
 	if (err) {
-		std::cerr << "We had an error: " << err.message() << std::endl;
+		std::cerr << "ERROR:: " << err.message() << std::endl;
+		std::cout << "Killing connection to: " << con_handle->socket.remote_endpoint().address() << std::endl << std::endl;
 		m_connections.erase(con_handle);
 	}
 }
@@ -150,10 +156,7 @@ void Server::handle_acknowledge(con_handle_t con_handle, std::shared_ptr<string>
 void Server::handle_accept(con_handle_t& con_handle, boost::system::error_code const& err) {
 	if (!err) {
 
-#ifdef DEBUG_MODE
-		std::cout << "Connection from: " << con_handle->socket.remote_endpoint().address() << std::endl;
-		std::cout << "Sending acknowledgement" << std::endl;
-#endif // DEBUG_MODE
+		std::cout << "New connection from: " << con_handle->socket.remote_endpoint().address() << std::endl;
 
 		auto buff = std::make_shared<string>("\r\n\r\n");
 		auto handler = boost::bind(&Server::handle_acknowledge, this, con_handle, buff, boost::asio::placeholders::error);
@@ -162,7 +165,7 @@ void Server::handle_accept(con_handle_t& con_handle, boost::system::error_code c
 
 	}
 	else {
-		std::cerr << "We had an error: " << err.message() << std::endl;
+		std::cerr << "ERROR:: " << err.message() << std::endl;
 		m_connections.erase(con_handle);
 	}
 	start_accept();
@@ -190,7 +193,7 @@ void Server::run() {
 #ifdef LOG_MODE
 	string log_file_name = "log.txt";
 	log_writer.open(log_file_name, std::ios::app);
-	if (!log_writer) std::cerr << "COULD NOT CREATE LOG" << std::endl;
+	if (!log_writer) std::cerr << "ERROR:: Could not create log." << std::endl;
 #endif
 	m_ioservice.run();
 }
