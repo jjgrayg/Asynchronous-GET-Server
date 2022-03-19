@@ -106,6 +106,14 @@ void Server::write_response(con_handle_t con_handle) {
 	size_t binarySize = fileBuff.size();
 	auto buff = std::make_shared<string>(std::get<0>(resinfo));
 
+
+#ifdef LOG_MODE
+	write_to_log(split_string(*buff, ' ')[1]);
+	write_to_log(" ");
+	write_to_log(std::to_string(binarySize + (*buff).size()));
+	log_writer << std::endl;
+#endif // LOG_MODE
+
 #ifdef DEBUG_MODE
 	std::cout << "Request received by connection: " << split_string(req, '\n')[0] << std::endl << std::endl;
 	std::cout << "RESPONSE:\n" << *buff << std::endl << std::endl;
@@ -308,12 +316,6 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 		char num_char[10 + sizeof(char)];
 		sprintf_s(num_char, "%d", (int)rS.length() + (int)response.length() + (int)fileBuff.size());
 
-#ifdef LOG_MODE
-		write_to_log("200 ");
-		write_to_log(num_char);
-		log_writer << std::endl;
-#endif // LOG_MODE
-
 		if (binaryStatus) response.append("accept-ranges: bytes\r\nContent-Transfer-Encoding: binary\r\n");
 		response.append("Content - Length : ")
 			.append(num_char)
@@ -328,7 +330,7 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 }
 
 //////////////////////// FREE FUNCTION ////////////////////////
-// Splits a string on the detlimiter provided into a vector of strings
+// Splits a string on the delimiter provided into a vector of strings
 vector<string> split_string(string str, char det) {
 	string temp;
 	bool working = true;
