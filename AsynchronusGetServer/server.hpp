@@ -39,15 +39,17 @@ public:
 
     void write_to_log(string);
     void close_log_writer();
+    void close_connection(con_handle_t);
     void handle_read(con_handle_t, boost::system::error_code const&, size_t);
-    void do_async_read(con_handle_t con_handle);
+    void do_async_read(con_handle_t);
     void handle_response(con_handle_t, std::shared_ptr<string>, bool, boost::system::error_code const&);
-    void write_response(con_handle_t con_handle);
+    void write_response(con_handle_t);
     void handle_acknowledge(con_handle_t, std::shared_ptr<string>, boost::system::error_code const&);
     void handle_accept(con_handle_t&, boost::system::error_code const&);
     void start_accept();
     void listen(uint16_t);
     void run();
+    void stop();
     string parse_get(const char[]);
     std::tuple<string, bool, vector<unsigned char>> formulate_response(string);
 };

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- Metadata -->
+    <head>
+        <title>Home | Jarod Graygo</title>
+        <link href="src/css/base.css" type="text/css" rel="stylesheet">
+        <link href="src/css/index.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="./favicon.png">
+        <script src="src/js/portfolio_functionality.js"></script>
+        <script src="src/js/index.js"></script>
+        <script src="src/js/mobile_navbar.js" defer></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Portfolio Website for Jarod Graygo (jjgrayg)">
+    </head>
+
+    <!-- Displayed Portion -->
+    <body>
+
+        <!-- Top Navbar -->
+        <nav>
+            <ul>
+                <li><a href="./index.html" class="logo"><img alt="Logo" src="src/img/logo.png" width="30rem" height="30rem"></a>
+                </li>
+
+                <!-- REGULAR LINKS -->
+                <li><a href="./index.html" class="active">Home</a>
+                </li>
+                <li><a href="./contact.html">Contact</a>
+                </li>
+                <li><a href="./portfolio.html">Portfolio</a>
+                </li>
+                <li><a href="./about.html">About</a>
+                </li>
+                <li><a href="javascript:void(0);" class="icon" id="burger-menu" onclick="openMenu()">
+                    <svg viewBox="0 0 100 100" width="30" height="30" preserveAspectRatio="xMaxYMax meet">
+                        <rect width="100" height="20" rx="5"></rect>
+                        <rect y="30" width="100" height="20" rx="5"></rect>
+                        <rect y="60" width="100" height="20" rx="5"></rect>
+                    </svg>
+                </a></li>
+            </ul>
+                
+            <!-- MOBILE LINKS -->
+            <div id="link-menu" class="overlay" style="margin-left: -700px;">
+                <a href="./index.html" class="active">Home</a>
+                <a href="./contact.html">Contact</a>
+                <a href="./portfolio.html">Portfolio</a>
+                <a href="./about.html">About</a>
+                <img alt="Logo" src="src/img/logo.png" width="250rem" height="250rem" class="overlay-bg">
+            </div>
+        </nav>
+
+        <!-- The Banner -->
+        <div id="content" href="javascript:void(0)" onclick="closeMenu()">
+            <div id="banner">
+                <div id="banner-text">
+                    <h1>WELCOME</h1>
+                    <p>I am Jarod Graygo, current student at Kent State University majoring in Computer Science.
+                        Take a look at all the cool work I've done by clicking on the button below.</p><br><br><br>
+                    <a class="shortcut_button" href="./portfolio.html">Projects</a>
+                </div>
+            </div>
+
+            <!-- Description of Current Project -->
+            <div id="source-tutorial">
+                <div id="description">
+                    <h1>Source Code</h1>
+                    <p>If you're interested in poking around the source code of this site, simply select the type of device
+                        you are currently on and follow the steps indicated.
+                    </p>
+                    <br>
+                    <hr>
+                </div>
+            </div>
+            <div id="accordian">
+                <div id="1" class="accordian-item currently-viewed">
+                    <a><div class="horizontal-flex">
+                        <span class="accordian-link-text">Mobile/Tablet</span>
+                            <svg viewBox="0 0 42 42" width="30px" height="30px">
+                                <polygon points="42,20 22,20 22,0 20,0 20,20 0,20 0,22 20,22 20,42 22,42 22,22 42,22 "></polygon>
+                            </svg>
+                        </div></a>
+                    <div class="vertical-flex">
+                        <div id="1-text" class="text">
+                            <p class="description">Click on the url at the top of your screen and add "view-source:" without the quotes before the "https://" as
+                                seen in the image below.</p>
+                            <img alt="view-source:https://jjgrayg.com" src="src/img/SmartSelect_20210607-235610_Chrome.jpg"/>
+                        </div>
+                    </div>
+                </div>
+                <div id="2" class="accordian-item">
+                    <a><div class="horizontal-flex">
+                        <span class="accordian-link-text">PC/Mac</span>
+                            <svg viewBox="0 0 42 42" width="30px" height="30px">
+                                <polygon points="42,20 22,20 22,0 20,0 20,20 0,20 0,22 20,22 20,42 22,42 22,22 42,22 "></polygon>
+                            </svg>
+                        </div></a>
+                    <div class="vertical-flex">
+                        <div id="1-text" class="not-viewed text">
+                            <p class="description">Begin by right-clicking anywhere on the page and you'll see a menu like the one shown here.</p>
+                            <img alt="Right-Click Menu" src="src/img/right-click-menu.png"/>
+                            <p class="description">Simply click on the button that says "view page source" and you'll be brought to the 
+                                source code page.</p>
+                            <img alt="Source Code Screenshot" src="src/img/example-source.png"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <p>What are you doing down here?</p>
+            </footer>
+        </div>
+    </body>
+</html>

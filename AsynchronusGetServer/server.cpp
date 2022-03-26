@@ -11,9 +11,6 @@
 
 #include "server.hpp"
 
-// Simple way to identify each connection
-int CONNECTOR_TALLY = 0;
-
 // DEBUGGING OPTION
 // #define DEBUG_MODE
 
@@ -25,9 +22,16 @@ void Server::write_to_log(string str) {
 	log_writer << str;
 }
 
-// Handles closing log_writer at exit
+// Handles closing log_writer
 void Server::close_log_writer() {
 	log_writer.close();
+}
+
+void Server::close_connection(con_handle_t con_handle) {
+	std::cout << "Killing connection to: " << con_handle->socket.remote_endpoint().address() << std::endl;
+	con_handle->read_buffer.consume(con_handle->read_buffer.size());
+	con_handle->socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+	std::cout << "Connection successfully shut down.\n" << std::endl;
 }
 
 // Handle what happens after asynchronous read
@@ -46,8 +50,11 @@ void Server::handle_read(con_handle_t con_handle, boost::system::error_code cons
 	}
 	else if (err == boost::asio::error::eof) {}
 	else {
-		std::cerr << "We had an error: " << err.message() << std::endl;
-		m_connections.erase(con_handle);
+		std::cerr << "ERROR:: " << err.message() << std::endl;
+		if (con_handle != m_connections.end()) {
+			close_connection(con_handle);
+			m_connections.erase(con_handle);
+		}
 	}
 }
 
@@ -62,17 +69,16 @@ void Server::do_async_read(con_handle_t con_handle) {
 // If there isn't close the connection and clear the streambuf
 void Server::handle_response(con_handle_t con_handle, std::shared_ptr<string> msg_buffer, bool isFinished, boost::system::error_code const& err) {
 	if (!err && isFinished) {
-		std::cout << "Finished sending response to connection...\n";
 		if (con_handle->socket.is_open()) {
-			std::cout << "Connection will be shut down...\n";
-			con_handle->read_buffer.consume(con_handle->read_buffer.size());
-			con_handle->socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-			std::cout << "Connection successfully shut down.\n";
+			close_connection(con_handle);
 		}
 	}
 	else if (err) {
-		std::cerr << "We had an error: " << err.message() << std::endl;
-		m_connections.erase(con_handle);
+		std::cerr << "ERROR:: " << err.message() << std::endl;
+		if (con_handle != m_connections.end()) {
+			close_connection(con_handle);
+			m_connections.erase(con_handle);
+		}
 	}
 }
 
@@ -81,7 +87,15 @@ void Server::write_response(con_handle_t con_handle) {
 
 	string req(con_handle->request);
 
-#ifdef LOG_MODE		
+	string reqfile = parse_get(req.c_str());
+	std::tuple<string, bool, vector<unsigned char>> resinfo = formulate_response(reqfile);
+	bool isBinary = std::get<1>(resinfo);
+	vector<unsigned char> fileBuff = std::get<2>(resinfo);
+	size_t binarySize = fileBuff.size();
+	auto buff = std::make_shared<string>(std::get<0>(resinfo));
+
+
+#ifdef LOG_MODE	
 	time_t now = time(0);
 	char* dt = new char[26];
 	ctime_s(dt, 26, &now);
@@ -97,14 +111,11 @@ void Server::write_response(con_handle_t con_handle) {
 	string log_req = temp.substr(0, temp.length() - 1);
 	write_to_log(log_req);
 	write_to_log("\" ");
+	write_to_log(split_string(*buff, ' ')[1]);
+	write_to_log(" ");
+	write_to_log(std::to_string(binarySize + (*buff).size()));
+	log_writer << std::endl;
 #endif // LOG_MODE
-
-	string reqfile = parse_get(req.c_str());
-	std::tuple<string, bool, vector<unsigned char>> resinfo = formulate_response(reqfile);
-	bool isBinary = std::get<1>(resinfo);
-	vector<unsigned char> fileBuff = std::get<2>(resinfo);
-	size_t binarySize = fileBuff.size();
-	auto buff = std::make_shared<string>(std::get<0>(resinfo));
 
 #ifdef DEBUG_MODE
 	std::cout << "Request received by connection: " << split_string(req, '\n')[0] << std::endl << std::endl;
@@ -131,9 +142,17 @@ void Server::write_response(con_handle_t con_handle) {
 // Handle what happens after the acknowledgement is sent
 // This function does nothing unless an error has occurred
 void Server::handle_acknowledge(con_handle_t con_handle, std::shared_ptr<string> msg_buffer, boost::system::error_code const& err) {
+
+#ifdef DEBUG_MODE
+	if (!err)
+		std::cout << "Acknowledgment sent." << std::endl;
+#endif // DEBUG_MODE
 	if (err) {
-		std::cerr << "We had an error: " << err.message() << std::endl;
-		m_connections.erase(con_handle);
+		std::cerr << "ERROR:: " << err.message() << std::endl;
+		if (con_handle != m_connections.end()) {
+			close_connection(con_handle);
+			m_connections.erase(con_handle);
+		}
 	}
 }
 
@@ -142,10 +161,7 @@ void Server::handle_acknowledge(con_handle_t con_handle, std::shared_ptr<string>
 void Server::handle_accept(con_handle_t& con_handle, boost::system::error_code const& err) {
 	if (!err) {
 
-#ifdef DEBUG_MODE
-		std::cout << "Connection from: " << con_handle->socket.remote_endpoint().address() << std::endl;
-		std::cout << "Sending acknowledgement" << std::endl;
-#endif // DEBUG_MODE
+		std::cout << "New connection from: " << con_handle->socket.remote_endpoint().address() << std::endl;
 
 		auto buff = std::make_shared<string>("\r\n\r\n");
 		auto handler = boost::bind(&Server::handle_acknowledge, this, con_handle, buff, boost::asio::placeholders::error);
@@ -154,8 +170,11 @@ void Server::handle_accept(con_handle_t& con_handle, boost::system::error_code c
 
 	}
 	else {
-		std::cerr << "We had an error: " << err.message() << std::endl;
-		m_connections.erase(con_handle);
+		std::cerr << "ERROR:: " << err.message() << std::endl;
+		if (con_handle != m_connections.end()) {
+			close_connection(con_handle);
+			m_connections.erase(con_handle);
+		}
 	}
 	start_accept();
 }
@@ -182,9 +201,18 @@ void Server::run() {
 #ifdef LOG_MODE
 	string log_file_name = "log.txt";
 	log_writer.open(log_file_name, std::ios::app);
-	if (!log_writer) std::cerr << "COULD NOT CREATE LOG" << std::endl;
+	if (!log_writer) std::cerr << "ERROR:: Could not create log." << std::endl;
 #endif
 	m_ioservice.run();
+}
+
+// Stops the server and all its services
+void Server::stop() {
+	m_ioservice.stop();
+	if (m_acceptor.is_open())
+		m_acceptor.close();
+	m_connections.clear();
+	close_log_writer();
 }
 
 // Extract the requested filename from the request and return it as a string
@@ -219,23 +247,23 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 	// Create input file stream
 	std::ifstream in(filePath.c_str());
 
-	// Get current time and store in char array
+	// Get current date and time and store in char array
 	auto start = std::chrono::system_clock::now();
 	std::time_t time = std::chrono::system_clock::to_time_t(start);
 	char charTime[256];
 	ctime_s(charTime, sizeof(charTime), &time);
 
 	// Initialize necessary vars
-	string response;
 	vector<unsigned char> fileBuff;
-	unsigned long imageSize = 0;
 	bool binaryStatus = false;
 	vector<string> vec = split_string(filePath, '.');
+	string fileName = vec[0];
 	string fileExtension;
+	string response;
+
 	if (vec.size() > 1) {
 		fileExtension = vec[1];
 	}
-	string fileName = vec[0];
 
 	// If the file requested is invalid as decided by "parse_get()" return default values
 	if (filePath == "invalid") return std::make_tuple(response, binaryStatus, fileBuff);
@@ -243,22 +271,26 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 	// If file can't be found return a 404 response
 	if (!in) {
 		std::cerr << "Could not open " << filePath << std::endl;
-		response = response + "HTTP/1.1 404 Not Found\r\n" +
-			"Date: " + charTime + " EST\r\n" +
-			"Server : GetServer9000\r\n" +
-			"Content - Length : 230\r\n" +
-			"Connection : Closed\r\n" +
-			"Content - Type : text / html; charset = iso - 8859 - 1\r\n\r\n" +
-			"<!DOCTYPE HTML>\r\n" +
-			"<html>\r\n" +
-			"<head>\r\n" +
-			"<title>404 Not Found</title>\r\n" +
-			"</head>\r\n" +
-			"<body>\r\n" +
-			"<h1>Not Found</h1>\r\n" +
-			"<p>The requested URL /" + fileName + " was not found on this server.</p>\r\n" +
-			"</body>\r\n" +
-			"</html>";
+		response = "HTTP/1.1 404 Not Found\r\n"
+			"Date: ";
+		response.append(charTime)
+			.append(" EST\r\n"
+					"Server : Boost-Async-GET-Server\r\n"
+					"Content - Length : 230\r\n"
+					"Connection : Closed\r\n"
+					"Content - Type : text / html; charset = iso - 8859 - 1\r\n\r\n"
+					"<!DOCTYPE HTML>\r\n"
+					"<html>\r\n"
+					"<head>\r\n"
+					"<title>404 Not Found</title>\r\n"
+					"</head>\r\n"
+					"<body>\r\n"
+					"<h1>Not Found</h1>\r\n"
+					"<p>The requested URL /")
+			.append(fileName)
+			.append(" was not found on this server.</p>\r\n"
+					"</body>\r\n"
+					"</html>");
 	}
 
 	// If the file is found then parse
@@ -290,23 +322,25 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 		}
 
 		// Begin creating response
-		response = response + "HTTP/1.1 200 OK\r\n" +
-			"Date: " + charTime + " EST\r\n"
-			"Server : GetServer9000\r\n" +
-			"Content - Type : " + content_type + "\r\n" +
-			"Connection: Closed\r\n";
-		char num_char[10 + sizeof(char)];
+		response = "HTTP/1.1 200 OK\r\n"
+					"Date: ";
+		response.append(charTime)
+			.append(" EST\r\n"
+					"Server : Boost-Async-GET-Server\r\n"
+					"Content - Type : ")
+			.append(content_type)
+			.append("\r\n"
+					"Connection: Closed\r\n");
 
 		// Convert size to char array
+		char num_char[10 + sizeof(char)];
 		sprintf_s(num_char, "%d", (int)rS.length() + (int)response.length() + (int)fileBuff.size());
-#ifdef LOG_MODE
-		write_to_log("200 ");
-		write_to_log(num_char);
-		log_writer << std::endl;
-#endif // LOG_MODE
-		if (binaryStatus) response = response + "accept-ranges: bytes\r\nContent-Transfer-Encoding: binary\r\n";
-		response = response + "Content - Length : " + num_char + "\r\n\r\n";
-		response += rS;
+
+		if (binaryStatus) response.append("accept-ranges: bytes\r\nContent-Transfer-Encoding: binary\r\n");
+		response.append("Content - Length : ")
+			.append(num_char)
+			.append("\r\n\r\n")
+			.append(rS);
 
 	}
 	in.close();
@@ -316,7 +350,7 @@ std::tuple<string, bool, vector<unsigned char>> Server::formulate_response(strin
 }
 
 //////////////////////// FREE FUNCTION ////////////////////////
-// Splits a string on the detlimiter provided into a vector of strings
+// Splits a string on the delimiter provided into a vector of strings
 vector<string> split_string(string str, char det) {
 	string temp;
 	bool working = true;

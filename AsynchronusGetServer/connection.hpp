@@ -15,6 +15,7 @@
 
 #include <boost/asio.hpp> 
 #include <boost/bind.hpp>
+#include <boost/asio/posix/stream_descriptor.hpp>
 
 using std::string;
 

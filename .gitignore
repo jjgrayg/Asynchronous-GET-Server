@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # Ignore log file
 log.txt
+
+# Ignore libs folder
+libs/

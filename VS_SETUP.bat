@@ -1,0 +1,1 @@
+setx BOOST178_DIR C:\boost_1_78_0
