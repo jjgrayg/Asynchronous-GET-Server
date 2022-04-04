@@ -402,3 +402,6 @@ log.txt
 
 # Ignore libs folder
 libs/
+
+# Ignore Notepad++ .bak files
+*.bak

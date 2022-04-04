@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- Metadata -->
+    <head>
+        <title>About | Jarod Graygo</title>
+        <link href="src/css/base.css" type="text/css" rel="stylesheet">
+        <link href="src/css/about.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="./favicon.png">
+        <script src="src/js/banner_animation.js"></script>
+        <script src="src/js/mobile_navbar.js" defer></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Portfolio Website for Jarod Graygo (jjgrayg)">
+    </head>
+
+    <!-- Displayed Portion -->
+    <body>
+
+        <!-- Top Navbar -->
+        <nav>
+            <ul>
+                <li><a href="./index.html" class="logo"><img alt="Logo" src="src/img/logo.png" width="50rem" height="50rem"></a>
+                </li>
+
+                <!-- REGULAR LINKS -->
+                <li><a href="./index.html">Home</a>
+                </li>
+                <li><a href="./contact.html">Contact</a>
+                </li>
+                <li><a href="./portfolio.html">Portfolio</a>
+                </li>
+                <li><a href="./about.html" class="active">About</a>
+                </li>
+                <li><a href="javascript:void(0);" class="icon" id="burger-menu" onclick="openMenu()">
+                    <svg viewBox="0 0 100 100" width="30" height="30" preserveAspectRatio="xMaxYMax meet">
+                        <rect width="100" height="20" rx="5"></rect>
+                        <rect y="30" width="100" height="20" rx="5"></rect>
+                        <rect y="60" width="100" height="20" rx="5"></rect>
+                    </svg>
+                </a></li>
+            </ul>
+                
+            <!-- MOBILE LINKS -->
+            <div id="link-menu" class="overlay" style="margin-left: -700px;">
+                <a href="./index.html">Home</a>
+                <a href="./contact.html">Contact</a>
+                <a href="./portfolio.html">Portfolio</a>
+                <a href="./about.html" class="active">About</a>
+                <img alt="Logo" src="src/img/logo.png" width="500rem" height="500rem" class="overlay-bg">
+            </div>
+        </nav>
+
+        <div id="content" href="javascript:void(0)" onclick="closeMenu()">
+            <div id="banner">
+                <div id="banner-text">
+                    <h1>ABOUT</h1>
+                </div>
+            </div>
+            <div id="main-text">
+                <div class="about">
+                    <div class="description">
+                        <div class="grey-box">
+                            <p>whoami</p>
+                        </div><br>
+                        <p>My name is Jarod Graygo and I am a student at 
+                            Kent State University pursuing a Bachelor of Science in computer science.
+                        </p>
+                        <div class="grey-box">
+                            <p>cat hobbies.txt</p>
+                        </div><br>
+                        <p>
+                            I enjoy lots of things including programming, gaming, playing guitar, and food, 
+                            though I spend most of my time at work or working on new development projects these days
+                        </p>
+                    </div>
+                    <div class="image">
+                        <img alt="Picture of me" src="src/img/me.jpg" width="289" height="290">
+                    </div>
+                </div>
+                <div class="description-2">
+                    <div class="grey-box">
+                        <p>strings skills.cpp</p>
+                    </div><br>
+                    <p>
+                        I have experience with several programming languages including C++ (of which I have the most practice), Java, Python, R, MatLab, JavaScript, HTML, 
+                        and CSS. I am currently working on getting the hang of using JS resources like Node.js and React.js.
+                    </p>
+                    <div class="grey-box">
+                        <p>traceroute life.com</p>
+                    </div><br>
+                    <p>I was born and raised in Youngstown, Ohio, graduated from Ursuline High School in 2016, and once I got to college, had a real hard time deciding what 
+                        I wanted to do. I began pursuing a degree in chemical engineering at Youngstown State University before switching to digital electrical engineering 
+                        after a year. After one semester in electrical engineering, I decided to take a semester off to try to decide what I really wanted to do. I thought 
+                        that I would stick with my decision for the time being as it seemed like a genuinely interesting field, especially if I could get a job concerning 
+                        quantum computing where I could utilize the weird and nearly impossible to understand parts of physics to help bring computing and cybersecurity to 
+                        new levels. During my next semester I took a calculus course with a lab that utilized the program MatLab. I had so much fun designing unnecessary UI, 
+                        algorithms, and scripts that I started to think about, yet again, changing majors. After that semester I took another class called Engineering Computing 
+                        where I learned even more MatLab and got scolded more than once for putting too much work into my code. After that semester I finally found exactly what 
+                        I wanted to do. Computer science. The field is so vast and all-encompassing in today's modern world that no matter what I was interested in, be it the 
+                        complex math that goes into machine learning, the creativity that goes into creating fantastic looking webpages, or the analytical thought that goes into 
+                        crafting the perfect algorithm, there would be something for me. So I transferred out of YSU to Kent State in order to pursue my degree in the field I've 
+                        fallen in love with.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>What are you doing down here?</p>
+        </footer>
+    </body>
+
+</html>

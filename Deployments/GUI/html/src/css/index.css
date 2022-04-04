@@ -1,0 +1,227 @@
+/* Banner */
+#banner {
+    height: auto;
+    background: black;
+    overflow: hidden;
+    background: #C33764;
+    background: -webkit-linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("../img/fotis-fotopoulos-DuHKoV44prg-unsplash.jpg"), center, center, no-repeat;
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("../img/fotis-fotopoulos-DuHKoV44prg-unsplash.jpg"), center, center, no-repeat;
+    background-size: cover;
+    position: relative;
+    text-align: center;
+    padding: 0 25%;
+}
+
+img {
+   object-fit: scale-down;
+}
+
+#banner * {
+    position: relative;
+}
+
+#banner h1 {
+    font-size: 4rem;
+    color: white;
+    font-family: Roboto, monospace, sans-serif;
+    font-weight: 400;
+    line-height: .25rem;
+}
+
+#banner p {
+    height: auto;
+    width: 90vw;
+    color: white;
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+}
+
+#banner-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.shortcut_button {
+    background-color: rgb(78, 78, 78);
+    margin: 30px auto 60px;
+    border-radius: 30px;
+    text-align: center;
+    padding: 10px 30px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: large;
+    font-size: 1rem;
+}
+
+/* Source Tutorial */
+#source-tutorial {
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+#description h1 {
+    font-size: 3rem;
+}
+
+#description p {
+    text-align: center;
+    margin: 10px auto 0;
+    width: 70vw;
+    font-size: 1rem;
+}
+
+/*Accordian*/
+#accordian {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-items: center;
+    width: 90vw;
+    margin: 0 auto;
+    padding-top: 15px;
+    padding-bottom: 150px;
+}
+
+.accordian-item {
+    background-color: white;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    flex-direction: column;
+}
+
+.accordian-item:hover {
+    background-color: rgb(238, 238, 238);
+}
+
+.not-viewed {
+    display: none;
+}
+
+.horizontal-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vertical-flex {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.accordian-item svg {
+    padding-right: 25px;
+    fill: rgb(133, 142, 153);
+    margin-top: -2px;
+}
+
+.accordian-link-text {
+    padding-left: 25px;
+    font-family: "Open Sans", sans-serif;
+    color: rgb(133, 142, 153);
+    font-weight: 700;
+    font-size: 2rem;
+}
+
+/*Define style for currently viewed*/
+.currently-viewed {
+    background-color: white;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+.currently-viewed:hover {
+    background-color: white;
+}
+
+.currently-viewed svg {
+    padding-right: 25px;
+    fill: rgb(86, 91, 97);
+}
+
+.currently-viewed .accordian-link-text {
+    color: rgb(86, 91, 97);
+}
+
+/*Inner Accordian Text*/
+.description {
+    font-family: "Open Sans", sans-serif;
+    font-weight: 700;
+    padding-left: 45px;
+    padding-top: 50px;
+    padding-right: 45px;
+    padding-bottom: 35px;
+    font-size: 1.25rem;
+}
+
+.text img {
+    max-width: 90%;
+    min-height: 10%;
+    margin-left: 5%;
+    border: 1px solid;
+    border-radius: 20px;
+}
+
+.vertical-flex {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+@media only screen and (min-width: 64em) {
+    #banner h1 {
+        font-size: 4rem;
+        line-height: 4rem;
+    }
+
+    #banner p {
+        font-size: 1rem;
+        width: 50vw;
+    }
+
+    #accordian {
+        width: 50vw;
+    }
+
+    .shortcut_button {
+        font-size: 1rem;
+    }
+
+    #description {
+        font-size: 1rem;
+    }
+
+    #description p {
+        font-size: 1rem;
+    }
+
+    #description h1 {
+        font-size: 2rem;
+    }
+
+    .orange-box p {
+        font-size: 1rem;
+    }
+
+    .orange-box {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+}
